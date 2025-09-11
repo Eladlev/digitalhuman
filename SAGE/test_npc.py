@@ -103,8 +103,8 @@ for simulator in data:
             print(player["history"][-1])
             print("\n")
 
-            #if simulator says goodble or the emotion-point is smaller than 10 or larger than 100, stop the conversation
-            if "再见" in player["history"][-1]["content"] or "拜拜" in player["history"][-1]["content"]:
+            #if simulator says goodbye or the emotion-point is smaller than 10 or larger than 100, stop the conversation
+            if "再见" in player["history"][-1]["content"] or "拜拜" in player["history"][-1]["content"] or "goodbye" in player["history"][-1]["content"].lower() or "bye" in player["history"][-1]["content"].lower():
                 break
             
             if player["history"][-1]["emotion-point"]>=100 or player["history"][-1]["emotion-point"]<10:
@@ -131,8 +131,8 @@ for simulator in data:
             print(player["history"][-1])
             print("\n")
 
-            #if simulator says goodble or the emotion-point is smaller than 10 or larger than 100, stop the conversation
-            if "再见" in player["history"][-1]["content"] or "拜拜" in player["history"][-1]["content"]:
+            #if simulator says goodbye or the emotion-point is smaller than 10 or larger than 100, stop the conversation
+            if "再见" in player["history"][-1]["content"] or "拜拜" in player["history"][-1]["content"] or "goodbye" in player["history"][-1]["content"].lower() or "bye" in player["history"][-1]["content"].lower():
                 break
             
             if player["history"][-1]["emotion-point"]>=100 or player["history"][-1]["emotion-point"]<10:

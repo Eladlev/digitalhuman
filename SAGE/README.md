@@ -321,9 +321,9 @@ If you wish to generate your own simulator profiles, follow these steps:
 
 Create seed talking sets and seed topic sets for generating profiles. These should include typical conversations and topics relevant to a scene.
 
-Example Talking: 今天去公园了，真开心！
+Example Talking: Went to the park today — felt so happy!
 
-Example Topic: 在学校成绩总是不好怎么办
+Example Topic: What should I do if my grades are always poor at school?
 
 ### Step 2: Set Up Your LLM API
 

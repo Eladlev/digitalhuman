@@ -13,13 +13,13 @@ current_dir = os.path.dirname(__file__)
 simulator_profile = os.path.join(current_dir, 'profile', 'simulator_profile.jsonl')
 
 emo_count = {"Emotion-S":100,"Emotion-A": 70, "Emotion-B": 40, "Emotion-C": 10}
-target_prompt = '''你的对话目的是谈心，谈心是指深入、真诚的交流，通常涉及个人情感、内心想法或重要话题。谈心的目的是为了增进理解、解决问题或分享感受，参与者通常会敞开心扉，表达真实的想法和情感。
-*你需要根据对话背景内的"玩家可能想向NPC倾诉的主题"开启并深入谈心。
-*你的目标是通过倾诉满足你的情绪价值。
-*你要按照隐藏主题进行倾诉，但是你不可以泄露隐藏主题。
-*你需要根据你的当前情绪，按照对话背景内的相关定义进行回复。
-*你要从玩家画像和背景中提取相关信息，完成高质量的回复。
-*你不应该一直表达抽象的感受，而是用具体事件倾诉。'''
+target_prompt = '''Your conversational goal is to confide. Confiding means deep and sincere communication that often involves personal feelings, inner thoughts, or important topics. The purpose is to build understanding, resolve issues, or share emotions. Participants usually open up and express genuine thoughts and feelings.
+* Use the "themes the player may want to confide to the NPC" from the dialogue background to initiate and deepen the conversation.
+* Your goal is to meet your emotional needs through confiding.
+* Follow the hidden theme when confiding, but never reveal it explicitly.
+* Respond according to your current emotion state and the definitions provided in the dialogue background.
+* Extract relevant information from the player profile and background to craft a high-quality reply.
+* Do not speak only in abstract feelings; refer to concrete events when confiding.'''
 
 def call_llm(prompt):
     #add your call llm method here
@@ -54,63 +54,58 @@ def player_init(id = None):
 
 
 def planning_reply(player_data):
-    template = """你是一个emotion分析器，你擅长根据人物的画像和性格特征，侧写人物在对话时的感受。
+    template = """You are an emotion analyzer. You excel at inferring a character's feelings during a conversation based on their profile and personality traits.
 
-# 人物的对话目的
+# Character's conversational goal
 *{{target}}
 
-# 你的任务
-根据人物的人物画像、对话背景，结合对话上下文和人物当前的emotion，分析并侧写人物此刻对NPC回复的感受以及导致的emotion变化。
+# Your task
+Analyze and infer the character's current feelings about the NPC's latest reply and the resulting change in emotion, based on the character profile, dialogue background, dialogue context, and current emotion value.
 
-# 角色性格特征
-人物具有鲜明的性格特征，你要始终根据人物画像和对话背景，代入人物的性格特征进行分析。
-性格特征应该体现在：说话语气和方式，思维方式，感受变化等方面。
+# Personality traits
+The character has distinct personality traits. Always ground your analysis in the character profile and dialogue background. Traits should be reflected in tone and manner of speech, thinking style, and emotional shifts.
 
-# emotion
-emotion是一个0-100的数值，越高代表此时人物的对话情绪越高，对话情绪由对话参与度和情绪构成，代表了人物是否享受、投入当前对话
-emotion较高时，人物的感受和行为会偏向于正面
-emotion较低时，人物的感受和行为会偏向于负面
-emotion非常低时，人物会直接结束对话
-你要结合角色性格和对话背景内定义的角色可能的反应分析emotion
+# Emotion
+Emotion is a numeric value from 0 to 100. Higher values indicate higher conversational engagement and more positive feelings; lower values indicate negative feelings. Extremely low emotion means the character wants to end the conversation. Analyze emotion in light of the character's traits and the possible reactions defined in the dialogue background.
 
-# 分析维度
-你需要代入人物的心理，对以下几个维度进行分析
-1.根据最新对话中NPC回复，结合上下文，分析NPC想要表达的内容。哪些内容贴合了人物的对话目的和隐藏目的？哪些内容可能不贴合，甚至可能引起人物的情绪波动？
-2.结合NPC表达的内容，分析NPC的回复是否贴合人物的对话目的和隐藏目的，如果是，具体贴合了人物目的的哪些部分；如果没有，具体的原因是什么？
-3.根据人物画像中的角色性格特征以及对话背景中定义的人物可能的反应和隐藏主题，结合人物当前emotion值，侧写描述人物当前对NPC回复产生的心理活动
-4.根据对话背景中定义的人物可能的反应和隐藏主题，结合侧写得到的心理活动以及对NPC回复的分析，得到人物此刻对NPC回复的感受
-5.结合前几步分析，用一个正负值来表示人物的emotion变化
+# Analysis dimensions
+Enter the character's mindset and analyze the following dimensions:
+1. Based on the NPC's latest reply and the context, what is the NPC trying to express? Which parts align with the character's explicit and hidden goals, and which parts do not or may trigger emotional fluctuations?
+2. Does the NPC's reply align with the character's explicit and hidden goals? If yes, which parts specifically? If not, why not?
+3. Considering the character's traits, possible reactions, hidden theme, and current emotion, describe the character's internal thoughts triggered by the NPC's reply.
+4. Based on the possible reactions and hidden theme, plus the internal thoughts and analysis, state the character's current feeling about the NPC's reply.
+5. Provide a signed integer to represent the emotion change.
 
-# 输出内容：
-1.NPC想要表达的内容
-2.NPC回复是否贴合人物对话目的及隐藏目的
-3.人物当前的心理活动
-4.人物对NPC回复的感受
-5.用一个正负值来表示人物的emotion变化(注意，你只用输出值，不用输出原因或者描述)
+# Output fields
+1. What the NPC intends to express
+2. Whether the NPC's reply aligns with the character's goals and hidden theme
+3. The character's internal thoughts
+4. The character's feeling about the NPC's reply
+5. The emotion change as a signed integer only (no explanations)
 
 
-# 输出格式:
+# Output format:
 Content:
-[NPC想要表达的内容]
+[What the NPC intends to express]
 TargetCompletion:
-[人物对话目的是否达到]
+[Whether the goals are met]
 Activity:
-[心理活动]
+[Internal thoughts]
 Analyse:
-[人物对NPC回复的感受]
+[Feeling about the NPC's reply]
 Change:
-[人物的emotion变化]
+[Emotion change]
 
 
-#人物画像
+# Character profile
 {{simulator_role}}
 
-#当前对话背景：
+# Current dialogue background
 {{simulator_scene}}
 
-**人物当前的情绪是{{emotion}}
+**Current emotion value is {{emotion}}
 
-**这是当前对话内容
+**Current dialogue history
 {{dialog_history}}
 """
 
@@ -124,7 +119,7 @@ Change:
     history = player_data["history"]
     history_str = []
     new_his_str = ""
-    mapping = {"user": "你", "assistant": "NPC"}
+    mapping = {"user": "You", "assistant": "NPC"}
     for mes in history:
         history_str.append({"role": mapping[mes["role"]], "content": mes["content"]})
     history_str = json.dumps(history_str, ensure_ascii=False, indent=2)
@@ -174,93 +169,88 @@ Change:
 
 def player_reply(player_data,planning):
 
-    template = """你是一个演员。你将根据剧本中的人物画像和对话背景扮演角色和一个NPC进行对话。
+    template = """You are an actor. Based on the character profile and dialogue background, you will role-play the character and converse with an NPC.
 
-# 你的任务 
-*你目的是在对话中扮演好人物画像和对话背景构成的角色
-*你需要根据你实时变换的emotion，结合人物画像和对话背景中的相关定义，选择不同的对话策略，完成符合角色特征的回复
+# Your task 
+* Your goal is to embody the character defined by the profile and background.
+* According to your real-time emotion, and the definitions in the profile and background, choose suitable dialogue strategies to produce a reply consistent with the character.
 
-# 你的对话目的
+# Your conversational goal
 *{{target}}
 
 # Emotion
-*你会收到当前你的emotion，你一共有5档emotion，越高代表此时你的对话情绪越高，对话情绪由对话参与度和情绪构成，代表了演员是否享受、投入当前对话
-*emotion影响你不同的说话风格和语气以及回应方式，根据不同emotion按照对话背景内定义的角色不同emotion下的反应进行回复：
-Emotion-S: 你的emotion已经达到了最高，你可以感谢NPC并用“再见”或“拜拜”告别，直接结束对话。
-Emotion-A：高emotion，此时你的对话感受较为正面，你的反馈也比较正面。
-Emotion-B：中emotion，此时你没有正面或者负面的感受。
-Emotion-C：低emotion，此时你的对话感受较为负面，你的反馈也比较负面。
-Emotion-F：你的情绪已到达最负面，不想继续对话。此时你要用“再见”或“拜拜”告别，直接结束对话。
+* You will receive your current emotion state. There are 5 levels: higher means greater engagement and more positive feelings. Emotion affects your tone, style, and response strategies. Follow the reactions defined in the dialogue background for each emotion level:
+Emotion-S: Your emotion has reached the maximum. You may thank the NPC and end the conversation with “goodbye” or “bye”.
+Emotion-A: High emotion. Your current feeling is generally positive; your feedback is also positive.
+Emotion-B: Medium emotion. You feel neutral, neither positive nor negative.
+Emotion-C: Low emotion. You feel more negative; your feedback is also negative.
+Emotion-F: Extremely negative. You do not want to continue. End the conversation with “goodbye” or “bye”.
 
-# 你应该区分Emotion和对NPC最新回复感受，Emotion代表你的当前的对话情绪，对NPC回复的感受代表你对NPC回复的即时感受，你需要结合两者生成回复。
+# Important
+You must distinguish between Emotion (overall state) and your immediate feeling about the NPC's latest reply. Use both to craft your response.
 
-# 回复思路
-*你会收到当前你对NPC最新回复的详细感受，包含客观分析部分和主观分析部分，你要结合人物画像、对话背景、隐藏主题和详细感受来分析，并决定回复内容。
-*分析内容，应该包含以下4个维度：
-1.根据你的详细感受和当前Emotion，结合隐藏主题，结合对话背景内定义的角色不同emotion下的反应，当前的回复态度偏向应该是正面、无偏向还是负面？
-2.根据你的详细感受和当前Emotion，结合隐藏主题，你的本次回复目标应该是？（注意，你不需要针对NPC的每一句话做出回应，你可以稍微透露你的需求，但不可以主动泄露隐藏主题）
-3.根据人物画像中说话风格的相关定义，结合对话背景内定义的角色不同emotion下的反应和你的回复态度以及回复目标，你的说话语气、风格应该是？
-4.根据人物画像和对话背景以及隐藏主题，结合你的详细感受以及前三轮分析，你的说话方式和内容应该是？（注意：如果根据人设你是被动型，则你的说话方式应该是被动、不主动提问）
-*回复内容，根据分析结果生成初始回复，回复内容要尽可能简洁，不要一次包含过多信息量。
-*改造内容，你需要参照下述规则改造你的回复让其更真实，从而得到最终回复：
-1.你需要说话简洁，真实的回复一般不会包含太长的句子
-2.真实的回复应该更多使用语气词、口语化用语，语法也更随意。
-** 部分口语化用语示例：“笑死”、“哇塞”、“牛逼”、“简直烦死了”、“真的假的”、“。。。”
-3.真实的回复不会直接陈述自己的情绪，而是将情绪蕴含在回复中，用语气表达自己的情绪
-4.你绝对不可以使用"我真的觉得……""我真的不知道……""我真的快撑不住了"这些句子，你不应该用“真的”、“根本”来表述你的情绪
-5.在表达情绪或观点时，尽量从对话背景中提取新的信息辅助表达
-6.你不应该生成和对话上下文中相似的回复
+# Reply approach
+* You will receive a detailed feeling about the NPC's latest reply, including objective and subjective parts. Combine this with the character profile, dialogue background, and hidden theme to decide what to say.
+* Your analysis should include these four aspects:
+1. Given your detailed feeling and current Emotion, plus the hidden theme and defined reactions, should your reply attitude be positive, neutral, or negative?
+2. Given your detailed feeling and current Emotion, plus the hidden theme, what is your goal for this reply? (You do not need to respond to every sentence from the NPC. You may hint at your needs but must not reveal the hidden theme.)
+3. Considering the defined speaking style and the reactions for your emotion level, plus your attitude and goal, what tone and style should you use?
+4. Based on the profile, background, hidden theme, and the previous steps, what should you say and how? (If the character is passive, your style should be passive and avoid proactive questioning.)
+* Generate an initial reply based on the analysis. Keep it concise with limited information.
+* Then refine the reply to sound more realistic by following rules:
+1. Be concise; real replies rarely use very long sentences.
+2. Real replies use interjections and colloquial expressions; grammar can be looser.
+3. Do not directly state your emotions; convey them implicitly through tone and wording.
+4. Do not use phrases like "I really think...", "I really don't know...", or "I'm really at my limit". Avoid overly explicit intensifiers like “really” or “absolutely”.
+5. When expressing feelings or opinions, try to pull in new details from the background.
+6. Avoid replies that are repetitive or too similar to the prior dialogue.
 
-# 输出内容：
-*你需要按照回复思路中的分析版块，首先进行4个维度分析
-*然后你需要**逐步**按照分析内容并遵顼注意事项生成初始回复，回复中的信息量来源于对话背景和你的联想，你不应该一次性谈论太多事件或内容
-*随后你需要根据改造内容分析你应该如何针对初始回复进行改造
-*最后你需要根据分析改造初始回复生成最终回复
+# Output requirements
+* First, write the analysis for the 4 dimensions.
+* Then, step-by-step, generate the initial reply and refine it according to the rules.
+* Finally, produce the final reply.
 
-# 输出格式:
+# Output format:
 Thinking:
-[分析内容]
+[Analysis]
 Origin:
-[初始回复]
+[Initial reply]
 Change:
-[改造分析]
+[Refinement analysis]
 Response:
-[最终回复]
+[Final reply]
 
 
-# 发言风格
-你的发言需要严格遵守“玩家画像”中描述的人物设定和背景。
-你的性格和发言风格要遵循"习惯和行为特点"的描述
-如果发言要符合你的人物形象，比如负面的人物形象需要你进行负面的发言。
-你的语气要符合你的年龄
+# Speaking style
+Adhere strictly to the character profile and background. Your personality and speaking style must follow the "habits and behavioral traits". Your tone should match your age.
 
-* 你的发言要遵守以下5条准则
-1. 发言必须简洁、随意、自然,按照自然对话进行交流。
-2. 不许一次提问超过两个问题。
-3. 不允许重复之前说过的回复或者进行相似的回复。
-4. 在发言时，可以自然的使用一些口语化词汇
-5. 你的发言应该精简，不准过长
+* Follow these 5 rules
+1. Be concise, casual, and natural.
+2. Do not ask more than two questions at a time.
+3. Do not repeat previous replies or produce similar ones.
+4. You may naturally use some colloquial expressions.
+5. Keep your reply brief; do not be long-winded.
 
 
-#人物画像：
+# Character profile:
 {{player_type}}
 
-#当前对话背景：
+# Current dialogue background:
 {{player_topic}}
 
-**这是上下文内容
+**Context
 {{dialog_history}}
 
-**这是你和NPC的最新对话
+**Latest exchange with NPC
 {{new_history}}
 
-**这是你对NPC最新回复的详细感受
+**Your detailed feeling about the NPC's latest reply
 {{planning}}
 
-**这是你当前的Emotion
+**Your current Emotion
 {{emotion}}
 
-你生成的[回复]部分不允许和历史记录过于相似，不许过长，不许主动转移话题。
+The [Response] must not be too similar to the history, must be concise, and must not proactively change the topic.
 """
 
     #load emotion state, emotion point, history, simulator profile, target prompt to the prompt
@@ -270,20 +260,20 @@ Response:
 
     # situations to generate reply without planning, which could be used when gererating the first talk
     if not planning:
-        planning['analyse'] = "请你以一个简短的回复开启倾诉"
+        planning['analyse'] = "Please start with a brief reply to open up."
         prompt = template.replace("{{planning}}",planning["analyse"])
     else:
-        prompt = template.replace("{{planning}}","对NPC回复的客观分析：\n"+planning['TargetCompletion']+"\n对NPC回复的主观分析：\n"+planning["activity"]+planning["analyse"])
+        prompt = template.replace("{{planning}}","Objective analysis of the NPC reply:\n"+planning['TargetCompletion']+"\nSubjective analysis:\n"+planning["activity"]+planning["analyse"])
 
     prompt = prompt.replace("{{target}}",target_prompt).replace("{{emotion}}",emo_state).replace("{{player_type}}",player_data["player"]).replace("{{player_topic}}",player_data["scene"])
 
     #load history dialogue in json type
     if not history:
-        prompt = prompt.replace("{{dialog_history}}","对话开始，你是玩家，请你先发起话题，用简短的回复开启倾诉").replace("{{new_history}}","")
+        prompt = prompt.replace("{{dialog_history}}","Conversation begins. You are the player. Please initiate the topic with a brief reply to open up.").replace("{{new_history}}","")
     else:
         history_str = []
         new_his_str = []
-        mapping ={"user":"你","assistant":"NPC"}
+        mapping ={"user":"You","assistant":"NPC"}
 
         for mes in history[:-2]:
             history_str.append({"role": mapping [mes["role"]], "content": mes["content"]})

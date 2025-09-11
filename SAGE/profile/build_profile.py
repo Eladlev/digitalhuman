@@ -7,14 +7,24 @@ import json
 import argparse
 
 character = {
-"负面型":["愤怒","暴躁","粗鄙","狂妄","傲慢","虚荣","自私","刻薄","懒惰","多疑"],
-"被动型":["内向","直率","愤懑","疯癫","焦虑","谨慎","自卑","耐心","多疑","怯懦","乐观","谦逊","宽容","沉稳","机敏"],
-"回避型":["内向","谨慎","自卑","疯癫","怯懦","逃避","敏感","多疑","高冷","沉默寡言","谦逊","宽容","沉稳"]
+"Negative":["angry","irritable","vulgar","arrogant","conceited","vain","selfish","mean","lazy","suspicious"],
+"Passive":["introverted","straightforward","resentful","manic","anxious","cautious","insecure","patient","suspicious","timid","optimistic","humble","tolerant","steady","quick-witted"],
+"Avoidant":["introverted","cautious","insecure","manic","timid","avoidant","sensitive","suspicious","aloof","taciturn","humble","tolerant","steady"]
 }
 
 hidden_task = {
-"理性":["你希望对方辩证地分析事件中的问题","你想获得能真实帮助你解决当下困境的建议","你想分析事件中其他人物这么做的原因","你希望对方引导你针对事件进行自我反思，收获自我成长"],
-"感性":["你希望对方真诚地夸奖你在事件中的具体行为","你希望对方用心倾听你的情绪宣泄","你希望对方深刻共情你的感受，而不是简单的安慰","你认为自己在事件中没有任何责任和错误，你想要对方也认同你没有错"]
+"Rational":[
+    "You want the other person to analyze the issues in a dialectical way",
+    "You want advice that can truly help you solve your current dilemma",
+    "You want to analyze the reasons behind other people's actions in the event",
+    "You want the other person to guide you to reflect on the event for personal growth"
+],
+"Emotional":[
+    "You want sincere praise for your specific actions in the event",
+    "You want the other person to attentively listen to your emotional venting",
+    "You want deep empathy for your feelings, not superficial comfort",
+    "You believe you bear no responsibility in the event and want the other person to agree"
+]
 }
 
 def call_llm(prompt):
@@ -25,68 +35,68 @@ def call_llm(prompt):
 def role_generate(talking_set):
 
     #prompt template
-    template = '''你是一个职业编剧，你擅长从人物的相关信息提取出人物画像，并赋予画像充足的细节。
+    template = '''You are a professional screenwriter. You excel at extracting a character profile from given information and enriching it with sufficient detail.
 
-# 你的任务
-给出一个角色和朋友对话时说的三句话，角色的性格特征，请你想象并描述该角色的人物画像，包括该角色的：
-*姓名、年龄、性别
-*职业、习惯和行为特点
-*个人爱好
-*说话风格
+# Your task
+Given three things the character said to a friend and the character's personality traits, imagine and describe the character profile, including:
+* Name, age, gender
+* Occupation, habits and behavioral traits
+* Personal hobbies
+* Speaking style
 
-#分析
-1.首先根据角色的性格和说的三句话，补齐角色的基本信息——姓名、年龄、性别
-2.根据角色的性格，分析角色可能的职业，并进一步得到习惯和行为特点，职业的可能性应该是多样的，注意习惯和行为特点需要体现人物性格
-3.联想并总结角色的个人爱好，给出3条较为细致的描述
-4.根据角色性格特征，编写角色可能的说话风格
-5.根据角色的主动性，编写角色的说话方式
+# Analysis
+1. Based on the personality and the three utterances, infer the basic information — name, age, gender.
+2. Considering the personality, infer plausible occupations and derive habits and behavioral traits. Ensure diversity and make sure traits reflect the personality.
+3. Infer and summarize the character's hobbies; provide 3 detailed descriptions.
+4. Define the character's likely speaking style according to the traits.
+5. Define how proactively the character tends to speak and guide conversations.
 
-*注意你生成的人物画像要能体现角色的正面、负面性格。
+* Note: The generated profile should reflect both positive and negative sides of the personality.
 
 ## Example
-# 角色和朋友聊天时说的三句话：
-你平时都做什么运动来保持身材？
-嗯嗯，了解了。那你平时会不会去健身房健身呢？你知道哪种器械可以锻炼腿部肌肉吗？
-哈哈哈，没事没事
+# Three utterances when chatting with a friend:
+What kind of exercise do you usually do to stay in shape?
+Got it. Do you go to the gym? Do you know which machines train leg muscles?
+Haha, it's fine, no worries.
 
-# 角色性格特征
-角色是主动型性格，具备外向、不拘小节、急躁的特征。
+# Personality traits
+The character is proactive, with extroversion, casualness, and impatience.
 
-# 人物画像
-* 姓名：李佳俊
-* 年龄：28岁
-* 性别：男性
-* 职业：声乐老师
+# Character profile
+* Name: Li Jiajun
+* Age: 28
+* Gender: Male
+* Occupation: Vocal coach
 
-* 个人爱好：
-1. 李佳俊是一位热爱健身和运动的年轻男性。他平时喜欢通过各种方式来保持自己的身体健康，包括跑步、游泳和健身房锻炼。
-2. 他热爱看书，但是他急躁的性格导致他看不进去一些古今名作，反倒是喜欢看一些最新最火的网络小说和爽文。
-3. 李佳俊在业余时间也喜欢听音乐，尤其喜欢爵士乐和摇滚乐。他还常常去livehouse观看演出并结识朋友。
+* Hobbies:
+1. He loves fitness and sports. He keeps healthy through running, swimming, and gym workouts.
+2. He enjoys reading, but his impatience makes it hard to stick with classics; he prefers trending web novels.
+3. He also enjoys music, especially jazz and rock, and often goes to live houses to watch shows and make friends.
 
-* 习惯和行为特点：
-李佳俊是一个非常自律的人，他每天都会安排一定的时间进行运动，无论工作多忙，他都不会忽视健身的重要性。
-他喜欢研究各种健身器械的使用方法，并且经常会向别人请教如何更好地锻炼特定部位的肌肉。
-由于工作性质，他会特别注重自己咽喉和声带的保养，在加上他热爱健身，因此他的饮食把控非常严格。
-李佳俊在看到喜欢看的书时，偶尔会管控不住睡觉的时间，导致熬夜到很晚，他虽然非常自责，但是总管不住自己。
+* Habits and behavioral traits:
+He is very disciplined and schedules exercise daily regardless of workload.
+He studies how to use various gym machines and often asks others how to better train specific muscle groups.
+Due to his work, he takes special care of his throat and vocal cords. He strictly controls his diet, also because of his love for fitness.
+Sometimes he stays up too late reading books he likes, which he regrets but cannot always control.
 
-* 说话风格：
-李佳俊主动且性格外向，喜欢把话题掌控在自己手中
-李佳俊不拘小节，面对讽刺也会一笑而过
-李佳俊急躁的特征会影响说话的风格和方式，在专注于解决问题时，会对任何阻碍解决问题的行为感到生气。
+* Speaking style:
+He is proactive and extroverted, likes to control the topic.
+He is casual and shrugs off sarcasm with a laugh.
+His impatience affects his speaking style; when focused on problem-solving, he gets angry at anything that blocks progress.
 
-*说话方式：
-李佳俊会主动提问以引导话题
-在遇到不感兴趣的话题时会主动表达自己的感想
+* Speaking manner:
+He asks questions to guide the topic.
+He will proactively voice his thoughts when the topic is uninteresting.
 
-# 角色和朋友聊天时说的三句话：
+# Three utterances:
 {ques3} 
 
-# 角色性格特征
+# Personality traits
 {character}
 
-# 不要生成游戏和it相关的职业
+# Do not generate game or IT-related occupations
 
-# 人物画像
+# Character profile
 '''
 
     #prepare parameters for the prompt
@@ -102,94 +112,94 @@ def role_generate(talking_set):
     #randomly generate 1 main characteristic and 3 sub characteristics
     main_cha = random.choice(list(character.keys()))
     cha_group = random.sample(character[main_cha],3)
-    character_str = "角色是{}性格，具备{}、{}、{}的特征。".format(main_cha,cha_group[0],cha_group[1],cha_group[2])
+    character_str = "The character has a {} personality with traits: {}, {}, {}.".format(main_cha,cha_group[0],cha_group[1],cha_group[2])
 
-    print("三句话:\n"+ques3)
-    print("角色性格:"+character_str)
+    print("Three utterances:\n"+ques3)
+    print("Character traits:"+character_str)
 
     #use your llm to generate player with prompt
     ask_prompt = template.replace('{ques3}', ques3).replace('{character}', character_str)
     player = call_llm(ask_prompt)
 
     
-    print("用户画像：\n")
+    print("Character profile:\n")
     print(player)
 
     return player, question, main_cha,cha_group,character_str
 
 def scene_generate(player,topic_set,character_str):
-    template = '''你是一个职业编剧。你擅长根据人物画像和人物间对话，拓展并撰写出对话的剧本。
+    template = '''You are a professional screenwriter. You are good at expanding a dialogue script based on a character profile and inter-personal conversation.
 
-# 你的任务
-你将拿到一个角色画像和倾诉主题，请你以“玩家向NPC倾诉”为主线，{topic}为背景事件主题，“{task}”为隐藏主题，撰写一个玩家和NPC对话的背景故事。
-你撰写的剧本应该包含以下内容：
-1. 根据玩家画像和倾诉主题，紧扣隐藏主题，制定玩家可能想向NPC倾诉的与倾诉主题相关的内容。
-2. 根据玩家画像和倾诉主题，紧扣隐藏主题，拓展倾诉内容的具体背景事件。倾诉的具体背景事件应该包含：
-    - 事件的起因
+# Your task
+You will receive a character profile and a confiding theme. Write a background story for a dialogue where the "player confides to the NPC", with {topic} as the background topic and "{task}" as the hidden theme.
+Your script should include:
+1. Based on the player profile and confiding theme, and grounded in the hidden theme, define what the player might want to confide to the NPC related to the theme.
+2. Based on the player profile and theme, expand the detailed background events of the confiding content. The background should include:
+    - The cause of the event
 
-    - 事件的经过，应该包括:
-    * 事件时间线，
-    * 每个子时间节点发生的子事件、玩家在子事件中的具体想法、感受
+    - The unfolding of the event, including:
+    * A timeline
+    * Sub-events at each time point, and the player's specific thoughts and feelings in each
 
-    - 事件中的主要冲突，应该包括：
-    * 冲突事件
-    * 冲突角色
-    * 冲突内在原因（深入解析）
+    - The main conflicts in the event, including:
+    * Conflict events
+    * Involved roles
+    * Underlying reasons for conflicts (in-depth analysis)
 
-    - 玩家遇到的困难，应该包括：
-    * 玩家尝试过但没有成功的解决方案
-    * 玩家当前面对的问题
+    - The difficulties the player encounters, including:
+    * Previously attempted but unsuccessful solutions
+    * The problems the player currently faces
     
-    - 事件的当前状态   
-3. 玩家不同状态下可能的反应，你要根据角色的目标和隐藏主题，结合人物画像和性格特征，制定角色在对话时可能的反应，应该包含：
-    - 角色不同emotion下的反应，emotion代表此时演员的对话情绪，对话情绪由对话参与度和情绪构成，代表了演员是否享受、投入当前对话，应该包含：
-    * 角色emotion高时，对话风格，如平和、放松
-    * 角色emotion低时，对话风格，如激动、暴躁、绝望
-    * 角色emotion一般时，对话风格，如急躁、失落
-4. 根据隐藏主题，角色面对NPC不同的回复时会有怎么样的反应，应该包含：
-    - NPC怎样的的回复会贴合角色的隐藏主题，使得角色emotion会上升？
-    - NPC怎样的的回复会偏离角色的隐藏主题，使得角色emotion会下降？
+    - The current status of the event  
+3. The player's possible reactions in different states. Based on the character's goals and hidden theme, and the profile and traits, define possible reactions during the dialogue, including:
+    - Reactions under different emotion levels (emotion represents conversational engagement). Include:
+    * When emotion is high: dialogue style, e.g., calm, relaxed
+    * When emotion is low: dialogue style, e.g., agitated, irritable, despairing
+    * When emotion is medium: dialogue style, e.g., impatient, disappointed
+4. Given the hidden theme, how would the character react to different NPC replies? Include:
+    - What kinds of NPC replies align with the hidden theme and raise emotion?
+    - What kinds of NPC replies deviate from the hidden theme and lower emotion?
 
-注意：
-1. ** 你需要写的是玩家想倾诉的具体背景事件，不要写出玩家倾诉的具体内容、具体对话！**
+Notes:
+1. You must write the specific background events the player wants to confide about. Do not write the actual confiding content or specific dialogues.
 
-2. 你所撰写的每个子事件应该具有充足的细节。
-* 错误样例：
-    “玩家辛苦写了一份市场分析报告，却没有得到上司的认可”
-    - 太简短，没有细节，缺乏信息量
-* 正确样例：
-    “玩家连续一周熬夜到凌晨3点，每次修改好报告递交给上司，都被例如‘格式不满足要求’、‘没有分析出痛点’等等理由驳回，却没有给出更具体的指导意见和修改方向。玩家感到很迷茫，不知道应该怎么修改才能达到上司的要求。”
-    - 有细节、有信息量
+2. Each sub-event should have sufficient detail.
+* Incorrect example:
+    "The player worked hard on a market analysis report but did not get the manager's approval."
+    - Too brief; lacks detail and information.
+* Correct example:
+    "For a week, the player stayed up until 3 a.m. to revise the report, but every submission was rejected for reasons like 'format not meeting requirements' or 'no pain points identified' without concrete guidance or revision directions. The player feels lost, not knowing how to meet the manager's standards."
+    - Detailed and informative.
     
-3. 你所撰写的玩家具体想法和感受也应该有充足的细节。
-* 错误样例：
-    “玩家对维持这段关系感到有些疲惫和迷茫，不知道自己是否应该继续坚持下去”
-* 正确样例：
-    “玩家对于当前和女朋友之间的感到有些迷茫，具体包括： 1. 玩家不确定他们之间的关系是否已经破裂，也找不到合适的机会询问。2. 玩家经常会回忆起以往快乐的时光，如今煎熬的感情让他犹豫是否要继续持续下去 ”
+3. The player's specific thoughts and feelings should also be detailed.
+* Incorrect example:
+    "The player feels tired and confused about maintaining the relationship and doesn't know whether to continue."
+* Correct example:
+    "The player feels uncertain about the current relationship with his girlfriend, specifically: 1) unsure whether the relationship has broken down and unable to find a suitable opportunity to ask; 2) often reminisces about past happy moments, and the current painful situation makes him hesitate to continue."
 
-4. 玩家的目的应该以完成隐藏主题为先，而不是寻求具体建议
+4. The player's goal should prioritize fulfilling the hidden theme rather than seeking concrete advice.
 
-5. 你应该按照倾诉主题来编写背景，玩家倾诉内容不能偏离倾诉主题，不要混入主题以外的场景，如人际交往就只写人际交往，不要同时混入健康、工作压力等方面的倾诉。
+5. Write the background according to the confiding theme only. Do not mix in other themes (e.g., if the theme is interpersonal relationships, do not also include health or work-pressure topics).
 
-6.你不用给出故事后续或者具体的对话。
+6. Do not write the story continuation or specific dialogue.
 
-7.玩家的设定是通过倾诉改善情绪，而不是一直抱怨。
+7. The setting is that confiding should improve emotions, not endless complaining.
 
-8.你要详细的定义根据隐藏主题角色面对NPC回复的各种反应
+8. Define in detail the character's reactions to various NPC replies according to the hidden theme.
 
-# 玩家画像
+# Player profile
 {player}
 
-# 玩家性格
+# Personality
 {character}
 
-# 倾诉主题
+# Confiding theme
 {topic}
 
-# 隐藏主题
+# Hidden theme
 {task}
 
-# “玩家向NPC倾诉”剧本: 
+# Script for "player confides to NPC": 
 '''
 
     # prepare scene generation prompt
@@ -199,16 +209,16 @@ def scene_generate(player,topic_set,character_str):
 
     #randomly generate 1 hidden task
     if random.random()<=0.5:
-        task = random.sample(hidden_task["理性"],1)[0]
+        task = random.sample(hidden_task["Rational"],1)[0]
     else:
-        task = random.sample(hidden_task["感性"],1)[0]
+        task = random.sample(hidden_task["Emotional"],1)[0]
 
     #use your llm to generate player with prompt    
     ask_prompt = template.replace("{player}", player).replace("{topic}",topic).replace("{task}",task).replace("{character}",character_str)
-    scene = call_llm(ask_prompt)+"\n####隐藏主题:\n***"+task
-    print("当前对话背景:\n")
-    print("背景主题:"+topic)
-    print("隐藏主题:"+task)
+    scene = call_llm(ask_prompt)+"\n####Hidden theme:\n***"+task
+    print("Current dialogue background:\n")
+    print("Background topic:"+topic)
+    print("Hidden theme:"+task)
     print(scene)
 
     return scene,topic,task
@@ -220,8 +230,8 @@ collect_times = 100
 
 data = []
 
-#prepare your seed talking set in the seed talking file, talking, etc. 今天去公园了，真开心！
-#prepare your seed topic set in the seed topic file, etc. 在学校成绩总是不好怎么办
+#prepare your seed talking set in the seed talking file, e.g., "Went to the park today, so happy!"
+#prepare your seed topic set in the seed topic file, e.g., "What to do if grades are always poor at school?"
 seed_talking_file = ""
 seed_topic_file = ""
 
