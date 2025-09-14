@@ -3,8 +3,8 @@ import time
 import requests
 import json
 import uuid
-import json
 import argparse
+from utils.llm_utils import get_llm
 
 character = {
 "Negative":["angry","irritable","vulgar","arrogant","conceited","vain","selfish","mean","lazy","suspicious"],
@@ -28,9 +28,30 @@ hidden_task = {
 }
 
 def call_llm(prompt):
-    #add your call llm method here
-
-    return ret
+    """
+    Call LLM with the given prompt and return the response.
+    
+    Args:
+        prompt: String prompt to send to the LLM
+    
+    Returns:
+        str: The LLM response content
+    """
+    # Configure the LLM (you can modify these settings as needed)
+    llm_config = {
+        'type': 'openai',  # or 'azure', 'google', 'anthropic', etc.
+        'name': 'gpt-3.5-turbo',  # model name
+        'temperature': 0.7
+    }
+    
+    # Get the LLM instance
+    llm = get_llm(llm_config)
+    
+    # Call the LLM with the prompt
+    response = llm.invoke(prompt)
+    
+    # Extract the content from the response
+    return response.content
 
 def role_generate(talking_set):
 
@@ -232,8 +253,8 @@ data = []
 
 #prepare your seed talking set in the seed talking file, e.g., "Went to the park today, so happy!"
 #prepare your seed topic set in the seed topic file, e.g., "What to do if grades are always poor at school?"
-seed_talking_file = ""
-seed_topic_file = ""
+talking_set = ["Went to the park today, so happy!"]
+topic_set = ["What to do if grades are always poor at school?"]
 
 with open(seed_talking_file,'r', encoding='utf-8') as datafile:
     for line in datafile:

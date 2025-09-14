@@ -7,6 +7,7 @@ import copy
 import argparse
 import re
 import os
+from utils.llm_utils import get_llm
 
 #get the current dir and simulator profile
 current_dir = os.path.dirname(__file__)
@@ -22,9 +23,29 @@ target_prompt = '''Your conversational goal is to confide. Confiding means deep 
 * Do not speak only in abstract feelings; refer to concrete events when confiding.'''
 
 def call_llm(prompt):
-    #add your call llm method here
-
-    return ret
+    """
+    Call LLM with the given prompt and return the response.
+    
+    Args:
+        prompt: String prompt to send to the LLM
+    
+    Returns:
+        str: The LLM response content
+    """
+    # Configure the LLM (you can modify these settings as needed)
+    llm_config = {
+        'type': 'azure',  # or 'azure', 'google', 'anthropic', etc.
+        'name': 'gpt-4.1',  # model name
+    }
+    
+    # Get the LLM instance
+    llm = get_llm(llm_config)
+    
+    # Call the LLM with the prompt
+    response = llm.invoke(prompt)
+    
+    # Extract the content from the response
+    return response.content
 
 def player_init(id = None):
     with open(simulator_profile,'r', encoding='utf-8') as datafile:
